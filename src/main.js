@@ -2,13 +2,13 @@ const { invoke } = window.__TAURI__.core;
 
 async function GetServiceList() {
   const services = await invoke('get_service_list');
-  const serviceList = services.replaceAll('\r', '').split('\n').filter(i => i.length > 0);
+  const serviceList = services.replaceAll('\r', '').split('\n').filter(i => i.length > 0).map(i => i.split('}->'));
   console.log(serviceList);
   return serviceList;
 }
 
-async function AddService(service) {
-  return invoke('add_service', { service });
+async function AddService(key, service) {
+  return invoke('add_service', { key, service });
 }
 
 async function GetPassword(password, service, maxLength) {
@@ -34,17 +34,17 @@ window.addEventListener("DOMContentLoaded", async () => {
   const ShowAllServices = async () => {
     Object.keys(passwords).map(e => delete passwords[e]);
     servicesGrid.innerHTML = '';
-    for (const service of await GetServiceList()) {
+    for (const [key, service] of await GetServiceList()) {
       const label = document.createElement('span');
       const pws = document.createElement('span');
       const btn = document.createElement('button');
 
-      label.innerHTML = service;
+      label.innerHTML = key;
       btn.innerHTML = 'Copy';
       pws.classList.add('truncate', 'max-w-32');
-      btn.classList.add('bg-zinc-400', 'hover:bg-green-500', 'dark:bg-zinc-700', 'dark:hover:bg-green-700', 'border', 'border-zinc-700', 'dark:border-zinc-300', 'transition-colors', 'duration-300');
+      btn.classList.add('bg-zinc-300', 'hover:bg-green-500', 'dark:bg-zinc-700', 'dark:hover:bg-green-700', 'border', 'border-zinc-700', 'dark:border-zinc-300', 'transition-colors', 'duration-300');
 
-      passwords[service] = pws;
+      passwords[key+' - '+service] = pws;
 
       servicesGrid.appendChild(label);
       servicesGrid.appendChild(pws);
@@ -58,12 +58,29 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   addService.onclick = async () => {
     const minLength = 4;
-    const newService = prompt(`Insert service name: \n(min length: ${minLength})`);
-    if (newService.length < minLength) {
-      alert(`ERROR\nLength: ${newService.length}\nMin length: ${minLength}`)
-      return;
+
+    const askStringWIthMinLength = (msg, ml) => {
+      let res = '§';
+      while (res.length < ml || res == '') {
+        res = prompt(msg+`\nMin length: ${ml}`);
+      }
+      return res;
     }
-    await AddService(newService)
+
+    const serviceKey = askStringWIthMinLength("Insert service key:\n(This will be visible on this page)", 3);
+    if (serviceKey.length == 0) return;
+
+    const serviceContent = askStringWIthMinLength("Insert service secret value:\n(This will not be visible and it's stored in the service file)", 8);
+    if (serviceContent.length == 0) return;
+
+    console.log({ serviceKey, serviceContent });
+    
+    // const newService = prompt(`Insert service secret content: \n(min length: ${minLength})`);
+    // if (newService.length < minLength) {
+    //   alert(`ERROR\nLength: ${newService.length}\nMin length: ${minLength}`)
+    //   return;
+    // }
+    await AddService(serviceKey, serviceContent);
     await ShowAllServices();
     await FetchPasswords();
   }
