@@ -11,8 +11,12 @@ const SERVICE_FILENAME: &str = "services.txt";
 
 #[tauri::command]
 fn passwordify(password: &str, service: &str, max_length: usize) -> String {
+    let mut var_salt = String::from(service);
+    while var_salt.len() < 16 {
+        var_salt += service;
+    }
     let mut b64 =
-        base64::prelude::BASE64_STANDARD.encode(String::from(service) + service + service);
+        base64::prelude::BASE64_STANDARD.encode(var_salt);
     b64 = b64.replace("=", "");
     let s = Salt::from_b64(b64.as_str()).unwrap();
     let argon2 = Argon2::default();
@@ -38,8 +42,8 @@ fn get_service_list() -> String {
 }
 
 #[tauri::command]
-fn add_service(service: &str) -> String {
-    save_service(service)
+fn add_service(key: &str, service: &str) -> String {
+    save_service(key, service)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -67,11 +71,11 @@ fn get_services() -> String {
     content
 }
 
-fn save_service(service: &str) -> String {
+fn save_service(key: &str, service: &str) -> String {
     check_service_path();
     let mut content: String = get_services();
     if !content.contains(service) {
-        content += format!("{}\n", service).as_str();
+        content += format!("{}{}->{}\n", key, '}', service).as_str();
         fs::write(SERVICE_FILENAME, content.clone()).unwrap();
     }
     content
