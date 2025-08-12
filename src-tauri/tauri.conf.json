@@ -1,16 +1,18 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "password-manager",
+  "productName": "vpr",
   "version": "0.1.0",
-  "identifier": "com.password-manager.app",
+  "identifier": "com.vttndr.vpr",
   "build": {
-    "frontendDist": "../src"
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
   },
   "app": {
-    "withGlobalTauri": true,
     "windows": [
       {
-        "title": "password-manager",
+        "title": "vpr",
         "width": 800,
         "height": 600
       }
