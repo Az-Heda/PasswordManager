@@ -3,13 +3,13 @@ import './styles/globals.css';
 import { useEffect, useMemo, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { KeyRound, Plus } from "lucide-react";
-import { toast } from "sonner"
+import { toast } from "sonner";
 
 import { Input } from "./components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { Button } from "./components/ui/button";
 import { Toaster } from "./components/ui/sonner";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './components/ui/dialog';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './components/ui/dialog';
 import { Label } from './components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from './components/ui/hover-card';
@@ -78,10 +78,6 @@ function App() {
   useEffect(() => {
     RequestPasswords();
   }, [typedPassword, maxLength])
-
-  function Sanitize(val: string): string {
-    return val.replace(/[^a-z0-9 -_,]/gi, '');
-  }
 
   useEffect(() => {
     GetAllServices();
